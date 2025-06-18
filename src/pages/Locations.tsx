@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, MapPin, Calendar, Star, Upload, FileText } from 'lucide-react';
+import { Plus, MapPin, Star, Upload, Link } from 'lucide-react';
 import { Restaurant } from '../types';
-import { restaurantAPI } from '../services/api';
+import { restaurantAPI, googleAPI } from '../services/api';
 
 interface LocationsProps {}
 
@@ -9,7 +9,6 @@ const Locations: React.FC<LocationsProps> = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showImportForm, setShowImportForm] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     address: '',
@@ -47,6 +46,16 @@ const Locations: React.FC<LocationsProps> = () => {
     }
   };
 
+  const handleConnectGoogle = async () => {
+    try {
+      const { authUrl } = await googleAPI.getAuthUrl();
+      window.location.href = authUrl;
+    } catch (error: any) {
+      console.error('Error getting Google auth URL:', error);
+      alert('Failed to initiate Google authentication');
+    }
+  };
+
   const handleImportReviews = async (restaurantId: string) => {
     try {
       const result = await restaurantAPI.importReviews(restaurantId);
@@ -54,7 +63,17 @@ const Locations: React.FC<LocationsProps> = () => {
       fetchRestaurants(); // Refresh the list
     } catch (error: any) {
       console.error('Error importing reviews:', error);
-      alert(error.response?.data?.error || 'Failed to import reviews');
+      
+      if (error.response?.data?.needsGoogleAuth) {
+        const shouldConnect = window.confirm(
+          'You need to connect your Google Business account to import reviews. Would you like to connect now?'
+        );
+        if (shouldConnect) {
+          handleConnectGoogle();
+        }
+      } else {
+        alert(error.response?.data?.error || 'Failed to import reviews');
+      }
     }
   };
 
@@ -81,13 +100,23 @@ const Locations: React.FC<LocationsProps> = () => {
           <p className="text-gray-600">Manage your restaurant locations and import reviews</p>
         </div>
         
-        <button
-          onClick={() => setShowAddForm(true)}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Location
-        </button>
+        <div className="flex space-x-3">
+          <button
+            onClick={handleConnectGoogle}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            <Link className="h-4 w-4 mr-2" />
+            Connect Google Business
+          </button>
+          
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Location
+          </button>
+        </div>
       </div>
 
       {/* Add Restaurant Form */}

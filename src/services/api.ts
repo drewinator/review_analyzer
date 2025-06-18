@@ -47,17 +47,6 @@ export const authAPI = {
   },
 };
 
-export const googleAPI = {
-  getAuthUrl: async () => {
-    const response = await api.get('/google/auth-url');
-    return response.data.data.authUrl;
-  },
-
-  getBusinessLocations: async (accessToken: string) => {
-    const response = await api.post('/google/locations', { accessToken });
-    return response.data.data.locations;
-  },
-};
 
 export const reviewAPI = {
   getReviews: async (restaurantId?: string, filters?: any) => {
@@ -109,16 +98,30 @@ export const restaurantAPI = {
     return response.data.data;
   },
 
-  importReviews: async (restaurantId: string, googlePlaceId?: string) => {
-    const response = await api.post('/restaurants/import-reviews', {
-      restaurantId,
-      googlePlaceId,
-    });
+  importReviews: async (restaurantId: string) => {
+    const response = await api.post(`/restaurants/${restaurantId}/import-reviews`);
     return response.data.data;
   },
 
   addManualReview: async (reviewData: any) => {
     const response = await api.post('/restaurants/manual-review', reviewData);
+    return response.data.data;
+  },
+};
+
+export const googleAPI = {
+  getAuthUrl: async () => {
+    const response = await api.get('/google/auth-url');
+    return response.data.data;
+  },
+
+  getBusinessLocations: async () => {
+    const response = await api.get('/google/locations');
+    return response.data.data;
+  },
+
+  getLocationReviews: async (locationName: string) => {
+    const response = await api.get(`/google/locations/${encodeURIComponent(locationName)}/reviews`);
     return response.data.data;
   },
 };
