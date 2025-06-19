@@ -11,7 +11,7 @@ export interface User {
 export interface SimpleReview {
   id: string;
   rating: number;
-  text?: string;
+  content?: string;
   authorName: string;
   publishedAt: string;
 }
@@ -33,7 +33,7 @@ export interface Review {
   id: string;
   googleId: string;
   rating: number;
-  text?: string;
+  content?: string;
   authorName: string;
   authorUrl?: string;
   profilePhoto?: string;
@@ -41,22 +41,32 @@ export interface Review {
   restaurantId: string;
   sentiment: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
   sentimentScore?: number;
+  keywords?: string[];
   status: 'PENDING' | 'RESPONDED' | 'IGNORED';
   createdAt: string;
   updatedAt: string;
-  restaurant: Restaurant;
-  responses: Response[];
+  restaurant?: Restaurant;
+  responses?: Response[];
 }
 
 export interface Response {
   id: string;
-  text: string;
+  content: string;
+  tone: 'PROFESSIONAL' | 'FRIENDLY' | 'APOLOGETIC' | 'GRATEFUL';
   reviewId: string;
   userId: string;
   isPosted: boolean;
   postedAt?: string;
+  isAIGenerated: boolean;
+  model?: string;
   createdAt: string;
   updatedAt: string;
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
 }
 
 export interface AuthResponse {

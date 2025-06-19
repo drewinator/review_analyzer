@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Review } from '../types';
-import ReviewCard from '../components/Reviews/ReviewCard';
+import { ReviewCardWithResponses } from '../components/Reviews/ReviewCardWithResponses';
 import ReviewFilters from '../components/Reviews/ReviewFilters';
 import ManualReviewForm from '../components/Reviews/ManualReviewForm';
+import { AIResponseModal } from '../components/Reviews/AIResponseModal';
 import { reviewAPI } from '../services/api';
 import { Loader2, Plus } from 'lucide-react';
 
@@ -10,6 +11,8 @@ const Reviews: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [showManualForm, setShowManualForm] = useState(false);
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [filters, setFilters] = useState({
     search: '',
     rating: '',
@@ -52,8 +55,14 @@ const Reviews: React.FC = () => {
   };
 
   const handleReply = (review: Review) => {
-    // TODO: Implement reply modal
-    console.log('Reply to review:', review.id);
+    setSelectedReview(review);
+    setShowAIModal(true);
+  };
+
+  const handleResponseGenerated = () => {
+    fetchReviews();
+    setShowAIModal(false);
+    setSelectedReview(null);
   };
 
   if (loading) {
@@ -89,6 +98,18 @@ const Reviews: React.FC = () => {
         onSuccess={fetchReviews}
       />
 
+      {selectedReview && (
+        <AIResponseModal
+          isOpen={showAIModal}
+          onClose={() => {
+            setShowAIModal(false);
+            setSelectedReview(null);
+          }}
+          review={selectedReview}
+          onResponseGenerated={handleResponseGenerated}
+        />
+      )}
+
       <div className="space-y-4">
         {reviews.length === 0 ? (
           <div className="text-center py-12">
@@ -96,11 +117,12 @@ const Reviews: React.FC = () => {
           </div>
         ) : (
           reviews.map((review) => (
-            <ReviewCard
+            <ReviewCardWithResponses
               key={review.id}
               review={review}
               onReply={handleReply}
               onUpdateStatus={handleUpdateStatus}
+              onRefresh={fetchReviews}
             />
           ))
         )}

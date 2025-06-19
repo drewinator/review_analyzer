@@ -1,6 +1,6 @@
 import React from 'react';
 import { Review } from '../../types';
-import { Star, MessageSquare, Calendar, User } from 'lucide-react';
+import { Star, MessageSquare, Calendar, User, Sparkles, Send, Edit2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface ReviewCardProps {
@@ -80,18 +80,18 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, onReply, onUpdateStatus
         </div>
       </div>
 
-      {review.text && (
-        <p className="text-gray-700 mb-4 leading-relaxed">{review.text}</p>
+      {review.content && (
+        <p className="text-gray-700 mb-4 leading-relaxed">{review.content}</p>
       )}
 
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2 text-sm text-gray-500">
           <Calendar className="h-4 w-4" />
-          <span>{review.restaurant.name}</span>
+          <span>{review.restaurant?.name || 'Restaurant'}</span>
         </div>
         
         <div className="flex items-center space-x-2">
-          {review.responses.length > 0 && (
+          {review.responses && review.responses.length > 0 && (
             <span className="inline-flex items-center text-sm text-gray-500">
               <MessageSquare className="h-4 w-4 mr-1" />
               {review.responses.length} response{review.responses.length !== 1 ? 's' : ''}
@@ -101,9 +101,10 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, onReply, onUpdateStatus
           {onReply && review.status === 'PENDING' && (
             <button
               onClick={() => onReply(review)}
-              className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-purple-700 bg-purple-100 hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
             >
-              Reply
+              <Sparkles className="h-4 w-4 mr-1" />
+              Generate Response
             </button>
           )}
           
